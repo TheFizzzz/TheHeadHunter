@@ -19,155 +19,37 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
 {
     public const string PluginGuid = "com.thefizzzz.huntersarsenal";
     public const string PluginName = "Hunter's Arsenal";
-    public const string PluginVersion = "0.1.0";
+    public const string PluginVersion = "0.2.0";
+    public const int MaxQuality = 7;
 
     private Harmony? _harmony;
 
     internal static ConfigEntry<float> BonusTrophyChance { get; private set; } = null!;
+    internal static ConfigEntry<float> GuardMarkChance { get; private set; } = null!;
+    internal static ConfigEntry<float> BulwarkMarkChance { get; private set; } = null!;
+    internal static ConfigEntry<float> HuntingMarkDuration { get; private set; } = null!;
     private static readonly Dictionary<Piece.Requirement, QualityRequirement> QualityRequirements = new();
+    private static readonly HashSet<Recipe> ArsenalRecipes = new();
     private static readonly HashSet<Recipe> CombinationRecipes = new();
 
     private static readonly IReadOnlyList<ProgressionTier> Progression =
         new[]
         {
-            new ProgressionTier(1, "Black Forest", "TrophyEikthyr", "Bronze", 1),
-            new ProgressionTier(2, "Swamp", "TrophyTheElder", "Iron", 2),
-            new ProgressionTier(3, "Mountains", "TrophyBonemass", "Silver", 3),
-            new ProgressionTier(4, "Plains", "TrophyDragonQueen", "BlackMetal", 4),
+            new ProgressionTier(1, "Black Forest", "TrophyEikthyr", "Bronze", "forge", 1),
+            new ProgressionTier(2, "Swamp", "TrophyTheElder", "Iron", "forge", 2),
+            new ProgressionTier(3, "Mountains", "TrophyBonemass", "Silver", "forge", 3),
+            new ProgressionTier(4, "Plains", "TrophyDragonQueen", "BlackMetal", "forge", 4),
+            new ProgressionTier(5, "Mistlands", "TrophyGoblinKing", "Eitr", "blackforge", 1),
+            new ProgressionTier(6, "Ashlands", "TrophySeekerQueen", "FlametalNew", "blackforge", 3),
+            new ProgressionTier(7, "Deep North", "TrophyFader", "Gold", "blackforge", 4),
         };
 
     private static readonly IReadOnlyList<WeaponDefinition> Weapons =
-        new[]
-        {
-            new WeaponDefinition(
-                "HuntersEdge",
-                "item_hunters_edge",
-                "Hunter's Edge",
-                "SwordIron",
-                WeaponDamageType.Slash,
-                35f,
-                20f,
-                new[] { 10, 25, 50, 25 }),
-            new WeaponDefinition(
-                "HuntersHammer",
-                "item_hunters_hammer",
-                "Hunter's Knell",
-                "MaceIron",
-                WeaponDamageType.Blunt,
-                35f,
-                20f,
-                new[] { 10, 25, 38, 25 }),
-            new WeaponDefinition(
-                "HuntersReach",
-                "item_hunters_reach",
-                "Hunter's Reach",
-                "AtgeirIron",
-                WeaponDamageType.Pierce,
-                45f,
-                20f,
-                new[] { 10, 38, 38, 38 }),
-            new WeaponDefinition(
-                "HuntersGaze",
-                "item_hunters_gaze",
-                "Hunter's Gaze",
-                "BowHuntsman",
-                WeaponDamageType.Pierce,
-                32f,
-                10f,
-                new[] { 5, 13, 19, 19 }),
-            new WeaponDefinition(
-                "HuntersGuard",
-                "item_hunters_guard",
-                "Hunter's Guard",
-                "ShieldBanded",
-                WeaponDamageType.Shield,
-                24f,
-                18f,
-                new[] { 6, 13, 13, 10 }),
-            new WeaponDefinition(
-                "HuntersBulwark",
-                "item_hunters_bulwark",
-                "Hunter's Bulwark",
-                "ShieldIronTower",
-                WeaponDamageType.Shield,
-                34f,
-                16f,
-                new[] { 10, 25, 19, 19 }),
-            new WeaponDefinition(
-                "HuntersFang",
-                "item_hunters_fang",
-                "Hunter's Fang",
-                "KnifeChitin",
-                WeaponDamageType.Dagger,
-                12f,
-                7.333f,
-                new[] { 5, 10, 13, 13 }),
-            new WeaponDefinition(
-                "HuntersSpear",
-                "item_hunters_spear",
-                "Hunter's Thorn",
-                "SpearElderbark",
-                WeaponDamageType.Pierce,
-                35f,
-                20f,
-                new[] { 6, 13, 13, 13 }),
-            new WeaponDefinition(
-                "HuntersCleaver",
-                "item_hunters_cleaver",
-                "Hunter's Bite",
-                "AxeIron",
-                WeaponDamageType.Slash,
-                35f,
-                20f,
-                new[] { 10, 25, 25, 25 }),
-            new WeaponDefinition(
-                "HuntersFury",
-                "item_hunters_fury",
-                "Hunter's Fury",
-                "AxeBerzerkr",
-                WeaponDamageType.Slash,
-                35f,
-                20f,
-                new[] { 0, 50, 50, 50 },
-                "HuntersCleaver"),
-            new WeaponDefinition(
-                "HuntersJaw",
-                "item_hunters_jaw",
-                "Hunter's Jaw",
-                "KnifeSkollAndHati",
-                WeaponDamageType.Dagger,
-                12f,
-                7.333f,
-                new[] { 0, 20, 26, 26 },
-                "HuntersFang"),
-            new WeaponDefinition(
-                "HuntersOath",
-                "item_hunters_oath",
-                "Hunter's Oath",
-                "THSwordKrom",
-                WeaponDamageType.Slash,
-                50f,
-                25f,
-                new[] { 15, 38, 63, 38 }),
-            new WeaponDefinition(
-                "HuntersJudgment",
-                "item_hunters_judgment",
-                "Hunter's Judgment",
-                "SledgeIron",
-                WeaponDamageType.Blunt,
-                45f,
-                20f,
-                new[] { 15, 38, 50, 38 }),
-            new WeaponDefinition(
-                "HuntersRuin",
-                "item_hunters_ruin",
-                "Hunter's Ruin",
-                "Battleaxe",
-                WeaponDamageType.Slash,
-                45f,
-                25f,
-                new[] { 15, 44, 50, 38 }),
-        };
+        ArsenalDefinitions.CreateWeapons();
+    private static readonly IReadOnlyDictionary<string, WeaponDefinition> WeaponsByPrefab =
+        Weapons.ToDictionary(weapon => weapon.PrefabName, StringComparer.Ordinal);
+    private static readonly IReadOnlyDictionary<string, WeaponDefinition> WeaponsByNameToken =
+        Weapons.ToDictionary(weapon => $"${weapon.NameToken}", StringComparer.Ordinal);
 
     private CustomLocalization Localization { get; } = LocalizationManager.Instance.GetLocalization();
 
@@ -175,6 +57,8 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
     {
         BindProgressionConfiguration();
         AddLocalization();
+        HuntingMarkManager.Initialize();
+        CommandManager.Instance.AddConsoleCommand(new ArsenalTestKitCommand());
         PrefabManager.OnVanillaPrefabsAvailable += RegisterItems;
 
         _harmony = Harmony.CreateAndPatchAll(typeof(TheHeadHunterPlugin).Assembly, PluginGuid);
@@ -186,10 +70,31 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
         BonusTrophyChance = Config.Bind(
             "Trophy hunting",
             "Bonus trophy chance",
-            25f,
+            6f,
             new ConfigDescription(
-                "Percent chance to award a trophy when the creature's normal trophy roll fails.",
+                "Second-roll percent after vanilla trophy failure on an Arsenal killing blow. 6% takes a 10% trophy (Draugr) to about 15%.",
                 new AcceptableValueRange<float>(0f, 100f)));
+        GuardMarkChance = Config.Bind(
+            "Trophy hunting",
+            "Guard parry mark chance",
+            11f,
+            new ConfigDescription(
+                "Second-roll percent on prey parried with Hunter's Guard. 11% takes a 10% trophy (Draugr) to about 20%.",
+                new AcceptableValueRange<float>(0f, 100f)));
+        BulwarkMarkChance = Config.Bind(
+            "Trophy hunting",
+            "Bulwark block mark chance",
+            5f,
+            new ConfigDescription(
+                "Second-roll percent on prey blocked with Hunter's Bulwark. 5% takes a 10% trophy (Draugr) to about 14.5%.",
+                new AcceptableValueRange<float>(0f, 100f)));
+        HuntingMarkDuration = Config.Bind(
+            "Trophy hunting",
+            "Hunting mark duration",
+            6f,
+            new ConfigDescription(
+                "Seconds before a Guard or Bulwark hunting mark expires.",
+                new AcceptableValueRange<float>(1f, 120f)));
 
         foreach (WeaponDefinition weapon in Weapons)
         {
@@ -203,7 +108,7 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
 
                 int defaultCost = weapon.MetalCosts[tier.Quality - 1];
                 weapon.ConfiguredMetalCosts[tier.Quality] = Config.Bind(
-                    $"Progression - {weapon.DisplayName}",
+                    $"Progression - {SanitizeConfigName(weapon.DisplayName)}",
                     $"{tier.DisplayName} {tier.Metal} amount",
                     defaultCost,
                     new ConfigDescription(
@@ -211,6 +116,11 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
                         new AcceptableValueRange<int>(1, 200)));
             }
         }
+    }
+
+    private static string SanitizeConfigName(string value)
+    {
+        return value.Replace("'", string.Empty);
     }
 
     private void AddLocalization()
@@ -231,9 +141,9 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
         {
             Name = $"${weapon.NameToken}",
             Description = $"${weapon.DescriptionToken}",
-            CraftingStation = "forge",
-            RepairStation = "forge",
-            MinStationLevel = Progression[0].ForgeLevel,
+            CraftingStation = Progression[0].CraftingStation,
+            RepairStation = Progression[0].CraftingStation,
+            MinStationLevel = Progression[0].StationLevel,
             Amount = 1,
         };
 
@@ -281,6 +191,7 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
                 $"Expected {expectedRequirements} requirements for {weapon.PrefabName}, got {requirements.Length}");
         }
 
+        ArsenalRecipes.Add(item.Recipe.Recipe);
         int requirementIndex = 0;
         if (weapon.IsCombination)
         {
@@ -308,45 +219,31 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
 
     private static void SetWeaponDamage(ItemDrop.ItemData.SharedData shared, WeaponDefinition weapon)
     {
-        switch (weapon.DamageType)
-        {
-            case WeaponDamageType.Slash:
-                shared.m_damages.m_slash = weapon.BaseDamage;
-                shared.m_damagesPerLevel.m_slash = weapon.DamagePerQuality;
-                break;
-            case WeaponDamageType.Blunt:
-                shared.m_damages.m_blunt = weapon.BaseDamage;
-                shared.m_damagesPerLevel.m_blunt = weapon.DamagePerQuality;
-                break;
-            case WeaponDamageType.Pierce:
-                shared.m_damages.m_pierce = weapon.BaseDamage;
-                shared.m_damagesPerLevel.m_pierce = weapon.DamagePerQuality;
-                break;
-            case WeaponDamageType.Dagger:
-                shared.m_damages.m_slash = weapon.BaseDamage;
-                shared.m_damages.m_pierce = weapon.BaseDamage;
-                shared.m_damagesPerLevel.m_slash = weapon.DamagePerQuality;
-                shared.m_damagesPerLevel.m_pierce = weapon.DamagePerQuality;
-                break;
-            case WeaponDamageType.Shield:
-                shared.m_blockPower = weapon.BaseDamage;
-                shared.m_blockPowerPerLevel = weapon.DamagePerQuality;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(weapon.DamageType));
-        }
+        CombatProfile profile = weapon.GetCombatProfile(1);
+        shared.m_damages = profile.Damage;
+        shared.m_damagesPerLevel = new HitData.DamageTypes();
+        shared.m_blockPower = profile.BlockPower;
+        shared.m_blockPowerPerLevel = 0f;
+        shared.m_maxDurability = profile.Durability;
+        shared.m_durabilityPerLevel = 0f;
+        shared.m_attack.m_attackStamina = profile.AttackStamina;
+        shared.m_attackForce = profile.Knockback;
+        shared.m_attack.m_drawStaminaDrain = profile.DrawStaminaDrain;
     }
 
     private void RegisterItems()
     {
         PrefabManager.OnVanillaPrefabsAvailable -= RegisterItems;
         QualityRequirements.Clear();
+        ArsenalRecipes.Clear();
         CombinationRecipes.Clear();
 
         foreach (WeaponDefinition weapon in Weapons)
         {
             RegisterItem(weapon);
         }
+
+        HuntingMarkManager.RegisterVisual();
 
         Jotunn.Logger.LogInfo(
             $"Registered {Weapons.Count} Hunter's Arsenal weapons with {Progression.Count} quality levels each");
@@ -375,12 +272,86 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
 
     internal static bool IsArsenalWeapon(string prefabName)
     {
-        return Weapons.Any(weapon => weapon.PrefabName.Equals(prefabName, StringComparison.Ordinal));
+        return WeaponsByPrefab.ContainsKey(prefabName);
+    }
+
+    internal static IEnumerable<WeaponDefinition> GetWeapons()
+    {
+        return Weapons;
+    }
+
+    internal static bool TryGetWeapon(
+        ItemDrop.ItemData item,
+        out WeaponDefinition weapon)
+    {
+        string? prefabName = GetItemPrefabName(item);
+        if (prefabName is not null &&
+            WeaponsByPrefab.TryGetValue(prefabName, out WeaponDefinition found))
+        {
+            weapon = found;
+            return true;
+        }
+
+        string? sharedName = item.m_shared?.m_name;
+        if (sharedName is not null &&
+            WeaponsByNameToken.TryGetValue(sharedName, out found))
+        {
+            weapon = found;
+            return true;
+        }
+
+        weapon = null!;
+        return false;
+    }
+
+    internal static bool TryGetCombatProfile(
+        ItemDrop.ItemData item,
+        int quality,
+        out CombatProfile profile)
+    {
+        if (TryGetWeapon(item, out WeaponDefinition weapon))
+        {
+            profile = weapon.GetCombatProfile(quality);
+            return true;
+        }
+
+        profile = null!;
+        return false;
+    }
+
+    internal static string? GetItemPrefabName(ItemDrop.ItemData item)
+    {
+        GameObject? prefab = item.m_dropPrefab;
+        if (prefab is null)
+        {
+            return null;
+        }
+
+        string name = prefab.name;
+        int clone = name.IndexOf("(Clone)", System.StringComparison.Ordinal);
+        return clone >= 0 ? name.Substring(0, clone).Trim() : name;
     }
 
     internal static bool IsCombinationRecipe(Recipe recipe)
     {
         return CombinationRecipes.Contains(recipe);
+    }
+
+    internal static bool TryGetProgressionTier(
+        Recipe recipe,
+        int quality,
+        out ProgressionTier tier)
+    {
+        if (ArsenalRecipes.Contains(recipe) &&
+            quality >= 1 &&
+            quality <= Progression.Count)
+        {
+            tier = Progression[quality - 1];
+            return true;
+        }
+
+        tier = null!;
+        return false;
     }
 
     private readonly struct QualityRequirement
@@ -393,6 +364,45 @@ internal sealed class TheHeadHunterPlugin : BaseUnityPlugin
 
         public int Quality { get; }
         public int Amount { get; }
+    }
+}
+
+[HarmonyPatch(typeof(Recipe), nameof(Recipe.GetRequiredStation))]
+internal static class ArsenalCraftingStationPatch
+{
+    [HarmonyPostfix]
+    private static void UseTierCraftingStation(
+        Recipe __instance,
+        int quality,
+        ref CraftingStation __result)
+    {
+        if (!TheHeadHunterPlugin.TryGetProgressionTier(__instance, quality, out ProgressionTier tier))
+        {
+            return;
+        }
+
+        GameObject? stationPrefab = PrefabManager.Instance.GetPrefab(tier.CraftingStation);
+        CraftingStation? station = stationPrefab?.GetComponent<CraftingStation>();
+        if (station is not null)
+        {
+            __result = station;
+        }
+    }
+}
+
+[HarmonyPatch(typeof(Recipe), nameof(Recipe.GetRequiredStationLevel))]
+internal static class ArsenalCraftingStationLevelPatch
+{
+    [HarmonyPostfix]
+    private static void UseTierCraftingStationLevel(
+        Recipe __instance,
+        int quality,
+        ref int __result)
+    {
+        if (TheHeadHunterPlugin.TryGetProgressionTier(__instance, quality, out ProgressionTier tier))
+        {
+            __result = tier.StationLevel;
+        }
     }
 }
 
@@ -510,6 +520,46 @@ internal static class DualRecipeConsumptionPatch
     }
 }
 
+[HarmonyPatch(typeof(Humanoid), "BlockAttack")]
+internal static class ShieldHuntingMarkPatch
+{
+    [HarmonyPostfix]
+    private static void MarkBlockedPrey(
+        Humanoid __instance,
+        Character attacker,
+        bool __result,
+        float ___m_blockTimer)
+    {
+        if (!__result || attacker is null)
+        {
+            return;
+        }
+
+        ItemDrop.ItemData? blocker = __instance.GetCurrentBlocker() ?? __instance.LeftItem;
+        if (blocker is null ||
+            !TheHeadHunterPlugin.TryGetWeapon(blocker, out WeaponDefinition weapon))
+        {
+            return;
+        }
+
+        bool timedParry = blocker.m_shared.m_timedBlockBonus > 1f &&
+            ___m_blockTimer >= 0f &&
+            ___m_blockTimer < 0.25f;
+        if (weapon.PrefabName == "HuntersGuard" && timedParry)
+        {
+            HuntingMarkManager.Apply(
+                attacker,
+                TheHeadHunterPlugin.GuardMarkChance.Value / 100f);
+        }
+        else if (weapon.PrefabName == "HuntersBulwark")
+        {
+            HuntingMarkManager.Apply(
+                attacker,
+                TheHeadHunterPlugin.BulwarkMarkChance.Value / 100f);
+        }
+    }
+}
+
 [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.GenerateDropList))]
 internal static class TrophyDropPatch
 {
@@ -518,22 +568,32 @@ internal static class TrophyDropPatch
         CharacterDrop __instance,
         ref List<KeyValuePair<GameObject, int>> __result)
     {
-        Character victim = __instance.GetComponent<Character>();
-        HitData? lastHit = victim?.m_lastHit;
+        Character? victim = __instance.GetComponent<Character>();
+        if (victim is null)
+        {
+            return;
+        }
+
+        HitData? lastHit = victim.m_lastHit;
         if (lastHit?.GetAttacker() is not Humanoid attacker)
         {
             return;
         }
 
+        float chance = HuntingMarkManager.Consume(victim);
         ItemDrop.ItemData? weapon = attacker.GetCurrentWeapon();
-        string? weaponPrefabName = weapon?.m_dropPrefab?.name;
-        if (weaponPrefabName is null ||
-            !TheHeadHunterPlugin.IsArsenalWeapon(weaponPrefabName))
+        if (weapon is not null && TheHeadHunterPlugin.TryGetWeapon(weapon, out _))
+        {
+            chance = Mathf.Max(
+                chance,
+                TheHeadHunterPlugin.BonusTrophyChance.Value / 100f);
+        }
+
+        if (chance <= 0f)
         {
             return;
         }
 
-        float chance = TheHeadHunterPlugin.BonusTrophyChance.Value / 100f;
         foreach (CharacterDrop.Drop drop in __instance.m_drops)
         {
             GameObject? trophyPrefab = drop.m_prefab;

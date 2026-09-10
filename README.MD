@@ -27,8 +27,23 @@ Each weapon is forged once and then upgraded as one persistent item:
 - Quality 2: Elder trophy + iron → Swamp strength
 - Quality 3: Bonemass trophy + silver → Mountains strength
 - Quality 4: Moder trophy + black metal → Plains strength
+- Quality 5: Yagluth trophy + refined eitr → Mistlands strength
+- Quality 6: Queen trophy + flametal → Ashlands strength
+- Quality 7: Fader trophy + bloodgold → Deep North strength
 
-The tier definitions and archetype-specific premium costs live in `JotunnModStub/JotunnModStub.cs`; metal costs are configurable through the BepInEx config file.
+Qualities 1–4 use the Forge. Qualities 5–7 use the Black Forge at levels 1, 3, and 4.
+The tier definitions and configurable archetype-specific premium costs live in the plugin source.
+
+## Combat and trophy behavior
+
+- Black Forest profiles are purely physical.
+- Two signature elements begin in the Swamp and grow from 20% to 40% of listed damage by the Deep North.
+- Raw damage targets the midpoint between representative vanilla quality-2 and quality-3 gear.
+- Weapon stamina, block, durability, and knockback match the regional vanilla quality-2 item. Shield block uses the dedicated hunting-shield table.
+- An Arsenal killing blow gets a configurable 6% second trophy roll after the vanilla roll fails.
+- Hunter's Guard parries mark prey for a configurable 11% second roll.
+- Hunter's Bulwark blocks mark prey for a configurable 5% second roll.
+- Marks last 6 seconds by default; only the highest eligible second-roll chance applies.
 
 ## Development
 
@@ -41,7 +56,25 @@ The project targets .NET Framework 4.8 and Jötunn 2.30.0.
 
 Debug builds deploy to `MOD_DEPLOYPATH/HuntersArsenal`. See the [Jötunn developer quickstart](https://valheim-modding.github.io/Jotunn/guides/quickstart.html) for general setup.
 
-## Roadmap
+### Field-test commands
 
-- Add Mistlands, Ashlands, and 1.0 endgame tiers after confirming their intended recipes.
-- Replace the temporary iron sword model with a custom asset.
+Enable the console with Valheim's `-console` launch argument, press F5, and enter `devcommands`.
+
+- `hunters_testkit 1` through `hunters_testkit 7` grants every available Arsenal item at that quality.
+- Fury and Jaw intentionally begin at quality 2.
+- Vanilla comparison items can still be created with `spawn <prefab> 1 <quality>`.
+
+For repeatable TTK tests, keep weapon skill, enemy level, attack sequence, stagger state, and ammunition constant.
+Compare each Arsenal tier with both quality-2 and quality-4 vanilla gear.
+
+### Debugging checklist
+
+1. Confirm the log contains `Loaded Hunter's Arsenal 0.2.0`.
+2. Confirm it reports 14 registered items and 7 quality levels.
+3. If an item is missing, search the log for `Failed to clone prefab`.
+4. If startup stops during Harmony initialization, search for `Undefined target method` or `No target method`.
+5. If stats look linear or retain model damage, verify only one `HuntersArsenal.dll` exists in the profile.
+6. If the test command is unavailable, run `devcommands` first and verify Jötunn loaded before Hunter's Arsenal.
+7. Multiplayer tests require every player to use the same mod version and configuration.
+
+The current models remain temporary vanilla placeholders.

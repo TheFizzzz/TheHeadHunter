@@ -185,13 +185,14 @@
     <div class="stat"><strong>14</strong><span>arsenal items</span></div>
     <div class="stat"><strong>10</strong><span>damage-profile families</span></div>
     <div class="stat"><strong>7</strong><span>biome qualities</span></div>
-    <div class="stat"><strong>25%</strong><span>weapon second-roll chance</span></div>
+    <div class="stat"><strong>11% / 6% / 5%</strong><span>Guard / weapon / Bulwark second rolls</span></div>
   </section>
 
   <div class="callout">
-    <strong>Design proposal — not implemented yet.</strong>
+    <strong>Implemented in Hunter's Arsenal 0.2.0.</strong>
     Total raw damage targets the midpoint between a representative vanilla quality 2 and quality 3.
-    Elements redistribute that budget rather than being added on top.
+    Elements redistribute that budget rather than being added on top. Stamina, weapon block, durability,
+    and knockback match the regional vanilla quality-2 item.
   </div>
 
   <section>
@@ -255,26 +256,116 @@
   </section>
 
   <section>
+    <h2>Hunter's Edge secondary stats</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Biome</th><th>Stamina</th><th>Knockback</th><th>Block</th><th>Durability</th><th>Vanilla Q2 comparator</th></tr></thead>
+        <tbody>
+          <tr><td>Black Forest</td><td>8</td><td>40</td><td>13</td><td>250</td><td>Bronze sword</td></tr>
+          <tr><td>Swamp</td><td>10</td><td>40</td><td>22</td><td>250</td><td>Iron sword</td></tr>
+          <tr><td>Mountains</td><td>12</td><td>40</td><td>31</td><td>250</td><td>Silver sword</td></tr>
+          <tr><td>Plains</td><td>14</td><td>40</td><td>40</td><td>250</td><td>Blackmetal sword</td></tr>
+          <tr><td>Mistlands</td><td>16</td><td>40</td><td>49</td><td>250</td><td>Mistwalker</td></tr>
+          <tr><td>Ashlands</td><td>16</td><td>40</td><td>58</td><td>250</td><td>Nidhögg</td></tr>
+          <tr><td>Deep North</td><td>16</td><td>40</td><td>66</td><td>250</td><td>Nord sword</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Other families use the same quality-2 rule. Shield block keeps the dedicated hunting-shield table.</p>
+  </section>
+
+  <section>
     <h2>Trophy chance calculations</h2>
+    <div class="callout">
+      Draugr trophies (vanilla <code>p = 10%</code>) are the calibration dummy. Solve the second-roll
+      percent from a target effective chance with
+      <code>c = (target − p) / (1 − p)</code>.
+      Guard is capped at 10% → 20%, so <code>c = 11%</code>.
+      Weaker effects target 10% → about 15%, so the Arsenal killing blow is <code>c = 6%</code>
+      and Bulwark is <code>c = 5%</code>. Every other creature uses those same <code>c</code> values
+      in <code>p + (1 − p) × c</code>; a 1% trophy does not become 20%.
+    </div>
+
+    <h3>Draugr worked example</h3>
+    <p class="subtitle">Vanilla trophy chance 10%. If that roll fails (90% of kills), the bonus rolls once.</p>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Vanilla chance</th><th>Normal kill</th><th>Arsenal killing blow: 25%</th><th>Bulwark mark: 20%</th><th>Guard parry mark: 40%</th></tr>
+          <tr>
+            <th>Source</th>
+            <th>Second roll c</th>
+            <th>Bonus from failed vanilla rolls</th>
+            <th>Effective trophy chance</th>
+          </tr>
         </thead>
         <tbody>
-          <tr><td>1%</td><td>1%</td><td>25.75%</td><td>20.8%</td><td>40.6%</td></tr>
-          <tr><td>5%</td><td>5%</td><td>28.75%</td><td>24%</td><td>43%</td></tr>
-          <tr><td>10%</td><td>10%</td><td>32.5%</td><td>28%</td><td>46%</td></tr>
-          <tr><td>20%</td><td>20%</td><td>40%</td><td>36%</td><td>52%</td></tr>
-          <tr><td>33%</td><td>33%</td><td>49.75%</td><td>46.4%</td><td>59.8%</td></tr>
-          <tr><td>50%</td><td>50%</td><td>62.5%</td><td>60%</td><td>70%</td></tr>
+          <tr><td>Normal kill</td><td>0%</td><td>—</td><td>10%</td></tr>
+          <tr><td>Hunter's Bulwark mark</td><td>5%</td><td>90% × 5% = 4.5 pp</td><td>14.5%</td></tr>
+          <tr><td>Arsenal killing blow</td><td>6%</td><td>90% × 6% = 5.4 pp</td><td>15.4%</td></tr>
+          <tr><td>Hunter's Guard parry mark</td><td>11%</td><td>90% × 11% = 9.9 pp</td><td>19.9% ≈ 20%</td></tr>
         </tbody>
       </table>
     </div>
     <p class="note">
-      Formula: <code>effective chance = p + (1 − p) × c</code>. The normal drop rolls first; the bonus rolls only
-      after failure. Only the highest eligible bonus applies. An Arsenal weapon's 25% therefore overrides a
-      Bulwark's 20%, while Guard's 40% overrides both.
+      Only the highest eligible <code>c</code> applies. Parrying with Guard and finishing with an Arsenal
+      weapon still uses 11%, not 11% + 6%.
+    </p>
+
+    <h3>Why rare trophies gain more</h3>
+    <p class="subtitle">
+      The bonus only rolls when vanilla fails, so the extra chance is <code>(1 − p) × c</code>.
+      Draugr fails vanilla 90% of the time; a 1% trophy fails 99% of the time. The same Guard 11%
+      therefore almost doubles Draugr (10% → 20%) and multiplies a 1% trophy by about 12× (1% → 12%).
+      Common trophies already succeed on the first roll, so the second roll rarely fires.
+    </p>
+
+    <h3>1% worked example — Deathsquito at launch</h3>
+    <p class="subtitle">
+      No current vanilla trophy sits at 1%. Deathsquito was the classic 1% hunt; it is 5% in Valheim 1.0.
+      This is the same table as Draugr, using that old 1% rate.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Second roll c</th>
+            <th>Bonus from failed vanilla rolls</th>
+            <th>Effective trophy chance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Normal kill</td><td>0%</td><td>—</td><td>1%</td></tr>
+          <tr><td>Hunter's Bulwark mark</td><td>5%</td><td>99% × 5% = 5.0 pp</td><td>6.0%</td></tr>
+          <tr><td>Arsenal killing blow</td><td>6%</td><td>99% × 6% = 5.9 pp</td><td>6.9%</td></tr>
+          <tr><td>Hunter's Guard parry mark</td><td>11%</td><td>99% × 11% = 10.9 pp</td><td>11.9% ≈ 12× vanilla</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Live Deathsquito is 5%: Guard takes that to 15.5% (about 3×). Wraith, Neck, Greydwarf, Surtling,
+      Stone Golem, Fuling berserker, and Fallen Valkyrie use the same 5% vanilla rate.
+    </p>
+
+    <h3>Same formula on other vanilla chances</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Vanilla chance p</th><th>Normal kill</th><th>Arsenal killing blow: 6%</th><th>Bulwark mark: 5%</th><th>Guard parry mark: 11%</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1% (launch Deathsquito)</td><td>1%</td><td>6.9%</td><td>6.0%</td><td>11.9%</td></tr>
+          <tr><td>5% (Deathsquito, Wraith, Neck)</td><td>5%</td><td>10.7%</td><td>9.8%</td><td>15.5%</td></tr>
+          <tr><td>10% (Draugr)</td><td>10%</td><td>15.4%</td><td>14.5%</td><td>19.9%</td></tr>
+          <tr><td>20%</td><td>20%</td><td>24.8%</td><td>24.0%</td><td>28.8%</td></tr>
+          <tr><td>33% (Serpent)</td><td>33%</td><td>37.0%</td><td>36.4%</td><td>40.4%</td></tr>
+          <tr><td>50% (Deer, Troll)</td><td>50%</td><td>53.0%</td><td>52.5%</td><td>55.5%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Formula: <code>effective chance = p + (1 − p) × c</code>. The vanilla drop rolls first; the bonus
+      rolls only after failure.
     </p>
   </section>
 
@@ -306,12 +397,25 @@
       <table>
         <thead><tr><th>Shield</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Q5</th><th>Q6</th><th>Q7</th><th>Hunting utility</th></tr></thead>
         <tbody>
-          <tr><td>Hunter's Guard</td><td>24</td><td>42</td><td>60</td><td>78</td><td>96</td><td>114</td><td>138</td><td>Parry marks prey for a 40% second roll</td></tr>
-          <tr><td>Hunter's Bulwark</td><td>32</td><td>52</td><td>70</td><td>104</td><td>122</td><td>140</td><td>164</td><td>Successful block marks prey for a 20% second roll</td></tr>
+          <tr><td>Hunter's Guard</td><td>24</td><td>42</td><td>60</td><td>78</td><td>96</td><td>114</td><td>138</td><td>Parry marks prey for an 11% second roll (Draugr 10% → 20%)</td></tr>
+          <tr><td>Hunter's Bulwark</td><td>32</td><td>52</td><td>70</td><td>104</td><td>122</td><td>140</td><td>164</td><td>Successful block marks prey for a 5% second roll (Draugr 10% → 14.5%)</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note">Marks refresh and never stack. Shield defense remains a separate balance pass from elemental weapon damage.</p>
+    <p class="note">Marks last 6 seconds by default, refresh, and never stack. Shield block is independent of the weapon elemental matrix.</p>
+  </section>
+
+  <section>
+    <h2>Field testing</h2>
+    <div class="card">
+      <ul>
+        <li>Enable the console, press F5, run <code>devcommands</code>, then <code>hunters_testkit 1</code> through <code>hunters_testkit 7</code>.</li>
+        <li>Fury and Jaw begin at quality 2.</li>
+        <li>Compare each Arsenal quality against vanilla quality 2 and quality 4 of the same archetype.</li>
+        <li>Keep weapon skill, enemy level, attack sequence, stagger, and ammunition constant.</li>
+        <li>Debug builds deploy to the r2modman profile configured by <code>MOD_DEPLOYPATH</code>.</li>
+      </ul>
+    </div>
   </section>
 
   <section>
@@ -340,7 +444,7 @@
       <a href="https://www.valheimgame.com/news/valheim-1-0-has-arrived-/">official Valheim 1.0 announcement</a>.
       Deep North damage and quality growth were verified against serialized prefabs from Valheim 1.0 launch build 25185596.
     </p>
-    <p>Hunter's Arsenal balance proposal · September 10, 2026</p>
+    <p>Hunter's Arsenal 0.2.0 field-test document · September 10, 2026</p>
   </footer>
 </main>
 </body>

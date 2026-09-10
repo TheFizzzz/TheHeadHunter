@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hunter's Arsenal — Balance Review</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #111315;
+      --panel: #191c20;
+      --panel-alt: #20242a;
+      --text: #eef1f4;
+      --muted: #aab2bd;
+      --line: #343a42;
+      --accent: #d8a94c;
+      --accent-soft: #342b1c;
+      --good: #8dc891;
+      --warning: #e1bd73;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 38px 0 64px;
+    }
+
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { margin: 0; font-size: clamp(28px, 5vw, 46px); }
+    h2 { margin: 34px 0 12px; font-size: 23px; }
+    h3 { margin: 0 0 8px; font-size: 17px; }
+    p { margin: 6px 0; }
+    a { color: var(--accent); }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 850px;
+      font-size: 17px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 1px;
+      margin: 26px 0;
+      border: 1px solid var(--line);
+      background: var(--line);
+    }
+
+    .stat {
+      padding: 18px;
+      background: var(--panel);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--accent);
+      font-size: 24px;
+    }
+
+    .stat span { color: var(--muted); }
+
+    .callout {
+      padding: 15px 18px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      white-space: nowrap;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--panel-alt);
+      color: var(--warning);
+      font-size: 13px;
+      letter-spacing: .02em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    th:last-child, td:last-child { border-right: 0; }
+    tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--panel) 86%, white 14%); }
+
+    .note {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    ul { margin: 8px 0 0; padding-left: 20px; }
+    code { color: var(--good); }
+
+    footer {
+      margin-top: 38px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 800px) {
+      .summary, .cards { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 520px) {
+      main { width: min(100% - 20px, 1500px); padding-top: 24px; }
+      .summary, .cards { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+        --bg: white;
+        --panel: white;
+        --panel-alt: #f2f2f2;
+        --text: #161616;
+        --muted: #555;
+        --line: #bbb;
+        --accent: #795713;
+        --accent-soft: #f8f1df;
+        --good: #205d2b;
+        --warning: #5e450e;
+      }
+
+      main { width: 100%; padding: 0; }
+      .table-wrap { overflow: visible; }
+      table { white-space: normal; font-size: 10px; }
+      th, td { padding: 5px; }
+      h2 { break-after: avoid; }
+      .table-wrap, .card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Hunter's Arsenal balance review</h1>
+    <p class="subtitle">
+      Exact Q1–Q7 proposal for the Valheim mod: vanilla quality-2.5 raw-damage budgets,
+      ten unique elemental pairings, and a growing elemental influence across later biomes.
+    </p>
+  </header>
+
+  <section class="summary" aria-label="Review summary">
+    <div class="stat"><strong>14</strong><span>arsenal items</span></div>
+    <div class="stat"><strong>10</strong><span>damage-profile families</span></div>
+    <div class="stat"><strong>7</strong><span>biome qualities</span></div>
+    <div class="stat"><strong>25%</strong><span>weapon second-roll chance</span></div>
+  </section>
+
+  <div class="callout">
+    <strong>Design proposal — not implemented yet.</strong>
+    Total raw damage targets the midpoint between a representative vanilla quality 2 and quality 3.
+    Elements redistribute that budget rather than being added on top.
+  </div>
+
+  <section>
+    <h2>Elemental influence by biome</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Biome</th><th>Physical share</th><th>Elemental shares</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Black Forest</td><td>100%</td><td>0%</td><td>Pure physical introduction</td></tr>
+          <tr><td>Swamp</td><td>80%</td><td>10% + 10%</td><td>Signature elements awaken</td></tr>
+          <tr><td>Mountains</td><td>80%</td><td>10% + 10%</td><td>Stable early elemental identity</td></tr>
+          <tr><td>Plains</td><td>75%</td><td>12.5% + 12.5%</td><td>Elemental influence begins expanding</td></tr>
+          <tr><td>Mistlands</td><td>67%</td><td>16.5% + 16.5%</td><td>Approximately one-third elemental</td></tr>
+          <tr><td>Ashlands</td><td>65%</td><td>17.5% + 17.5%</td><td>Physical remains the majority</td></tr>
+          <tr><td>Deep North</td><td>60%</td><td>20% + 20%</td><td>Strongest expression of both signatures</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Exact Hunter damage profiles</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Family</th><th>Q1 Forest</th><th>Q2 Swamp</th><th>Q3 Mountain</th><th>Q4 Plains</th><th>Q5 Mistlands</th><th>Q6 Ashlands</th><th>Q7 Deep North</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Edge · Fi/L</td><td>44 S</td><td>51 S + 6 Fi + 7 L = 64</td><td>67 S + 8 Fi + 9 L = 84</td><td>78 S + 13 Fi + 13 L = 104</td><td>83 S + 20 Fi + 21 L = 124</td><td>94 S + 25 Fi + 25 L = 144</td><td>111 S + 37 Fi + 37 L = 185</td></tr>
+          <tr><td>Knell · Fr/Sp</td><td>44 B</td><td>51 B + 6 Fr + 7 Sp = 64</td><td>83 B + 10 Fr + 11 Sp = 104</td><td>83 B + 13 Fr + 14 Sp = 110</td><td>83 B + 20 Fr + 21 Sp = 124</td><td>94 B + 25 Fr + 25 Sp = 144</td><td>111 B + 37 Fr + 37 Sp = 185</td></tr>
+          <tr><td>Reach · Fr/L</td><td>54 P</td><td>59 P + 7 Fr + 8 L = 74</td><td>75 P + 9 Fr + 10 L = 94</td><td>86 P + 14 Fr + 14 L = 114</td><td>90 P + 22 Fr + 22 L = 134</td><td>108 P + 29 Fr + 29 L = 166</td><td>118 P + 39 Fr + 40 L = 197</td></tr>
+          <tr><td>Gaze · Po/Sp (+ arrow)</td><td>37 P</td><td>38 P + 4 Po + 5 Sp = 47</td><td>51 P + 6 Po + 7 Sp = 64</td><td>59 P + 9 Po + 10 Sp = 78</td><td>61 P + 15 Po + 15 Sp = 91</td><td>62 P + 17 Po + 17 Sp = 96</td><td>84 P + 28 Po + 28 Sp = 140</td></tr>
+          <tr><td>Fang/Jaw · L/Po</td><td>Fang: 16 S + 17 P = 33</td><td>17 S + 17 P + 4 L + 5 Po = 43</td><td>21 S + 21 P + 5 L + 6 Po = 53</td><td>26 S + 27 P + 9 L + 9 Po = 71</td><td>31 S + 31 P + 15 L + 16 Po = 93</td><td>42 S + 42 P + 22 L + 23 Po = 129</td><td>49 S + 50 P + 33 L + 33 Po = 165</td></tr>
+          <tr><td>Thorn · Fr/Po</td><td>44 P</td><td>51 P + 6 Fr + 7 Po = 64</td><td>67 P + 8 Fr + 9 Po = 84</td><td>78 P + 13 Fr + 13 Po = 104</td><td>83 P + 20 Fr + 21 Po = 124</td><td>94 P + 25 Fr + 25 Po = 144</td><td>111 P + 37 Fr + 37 Po = 185</td></tr>
+          <tr><td>Bite/Fury · Fi/Po</td><td>Bite: 48 S</td><td>54 S + 7 Fi + 7 Po = 68</td><td>70 S + 9 Fi + 9 Po = 88</td><td>81 S + 13 Fi + 14 Po = 108</td><td>86 S + 21 Fi + 21 Po = 128</td><td>99 S + 26 Fi + 27 Po = 152</td><td>115 S + 38 Fi + 38 Po = 191</td></tr>
+          <tr><td>Oath · Fi/Sp</td><td>59 S</td><td>63 S + 8 Fi + 8 Sp = 79</td><td>103 S + 13 Fi + 13 Sp = 129</td><td>108 S + 18 Fi + 18 Sp = 144</td><td>107 S + 26 Fi + 26 Sp = 159</td><td>116 S + 31 Fi + 32 Sp = 179</td><td>135 S + 45 Fi + 45 Sp = 225</td></tr>
+          <tr><td>Judgment · L/Sp</td><td>34 B</td><td>51 B + 6 L + 7 Sp = 64</td><td>67 B + 8 L + 9 Sp = 84</td><td>78 B + 13 L + 13 Sp = 104</td><td>103 B + 25 L + 26 Sp = 154</td><td>128 B + 34 L + 35 Sp = 197</td><td>144 B + 48 L + 48 Sp = 240</td></tr>
+          <tr><td>Ruin · Fi/Fr</td><td>59 S</td><td>63 S + 8 Fi + 8 Fr = 79</td><td>79 S + 10 Fi + 10 Fr = 99</td><td>89 S + 15 Fi + 15 Fr = 119</td><td>93 S + 23 Fi + 23 Fr = 139</td><td>111 S + 30 Fi + 30 Fr = 171</td><td>122 S + 40 Fi + 41 Fr = 203</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">S slash · B blunt · P pierce · Fi fire · Fr frost · L lightning · Po poison · Sp spirit. Bow totals exclude ammunition.</p>
+  </section>
+
+  <section>
+    <h2>Hunter's Edge versus vanilla swords</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Biome</th><th>Proposed Edge</th><th>Vanilla Q2/Q3 anchors</th><th>Vanilla Q4 ceiling</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Black Forest</td><td>44 S</td><td>Bronze: 41 / 47 S</td><td>53 S</td><td>Exact midpoint; no elements yet</td></tr>
+          <tr><td>Swamp</td><td>51 S + 6 Fi + 7 L = 64</td><td>Iron: 61 / 67 S</td><td>73 S</td><td>Q2.5 total, split 80/20</td></tr>
+          <tr><td>Mountains</td><td>67 S + 8 Fi + 9 L = 84</td><td>Silver: 81 / 87 S</td><td>93 S + 45 Sp</td><td>Uses physical midpoint; Silver spirit remains its niche</td></tr>
+          <tr><td>Plains</td><td>78 S + 13 Fi + 13 L = 104</td><td>Blackmetal: 101 / 107 S</td><td>113 S</td><td>Q2.5 total, split 75/25</td></tr>
+          <tr><td>Mistlands</td><td>83 S + 20 Fi + 21 L = 124</td><td>Mistwalker Q2/Q3: 121 / 127 without spirit</td><td>148 total</td><td>Q2.5 total, split 67/33</td></tr>
+          <tr><td>Ashlands</td><td>94 S + 25 Fi + 25 L = 144</td><td>Nidhögg: 141 / 147 S</td><td>153 S</td><td>No chain-lightning proc</td></tr>
+          <tr><td>Deep North</td><td>111 S + 37 Fi + 37 L = 185</td><td>Nord: 180 / 190 S</td><td>200 S</td><td>Below infused Nord totals</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Trophy chance calculations</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Vanilla chance</th><th>Normal kill</th><th>Arsenal killing blow: 25%</th><th>Bulwark mark: 20%</th><th>Guard parry mark: 40%</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1%</td><td>1%</td><td>25.75%</td><td>20.8%</td><td>40.6%</td></tr>
+          <tr><td>5%</td><td>5%</td><td>28.75%</td><td>24%</td><td>43%</td></tr>
+          <tr><td>10%</td><td>10%</td><td>32.5%</td><td>28%</td><td>46%</td></tr>
+          <tr><td>20%</td><td>20%</td><td>40%</td><td>36%</td><td>52%</td></tr>
+          <tr><td>33%</td><td>33%</td><td>49.75%</td><td>46.4%</td><td>59.8%</td></tr>
+          <tr><td>50%</td><td>50%</td><td>62.5%</td><td>60%</td><td>70%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Formula: <code>effective chance = p + (1 − p) × c</code>. The normal drop rolls first; the bonus rolls only
+      after failure. Only the highest eligible bonus applies. An Arsenal weapon's 25% therefore overrides a
+      Bulwark's 20%, while Guard's 40% overrides both.
+    </p>
+  </section>
+
+  <section class="cards">
+    <div class="card">
+      <h3>Multiple physical damage channels</h3>
+      <ul>
+        <li>Fang/Jaw divide their physical share between slash and pierce.</li>
+        <li>Bite/Fury retain separate Q1–Q7 chop values: 45 / 55 / 60 / 65 / 75 / 85 / 95.</li>
+        <li>Ruin retains separate chop values: 44 / 44 / 54 / 64 / 74 / 74 / 74.</li>
+        <li>Chop is excluded from creature-damage budgets because it targets trees and eligible structures.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Element behavior</h3>
+      <ul>
+        <li>Frost slows; Wet increases frost damage by 1.5×.</li>
+        <li>Poison does not stack; only a stronger remaining application replaces it.</li>
+        <li>Spirit stacks, but most creatures and all players are immune.</li>
+        <li>Lightning is direct damage; Wet increases it by 1.5×. No chain proc is included.</li>
+        <li>Fire stacks into a five-second burn; Wet and many Ashlands enemies resist it.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Shield identity and progression</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Shield</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Q5</th><th>Q6</th><th>Q7</th><th>Hunting utility</th></tr></thead>
+        <tbody>
+          <tr><td>Hunter's Guard</td><td>24</td><td>42</td><td>60</td><td>78</td><td>96</td><td>114</td><td>138</td><td>Parry marks prey for a 40% second roll</td></tr>
+          <tr><td>Hunter's Bulwark</td><td>32</td><td>52</td><td>70</td><td>104</td><td>122</td><td>140</td><td>164</td><td>Successful block marks prey for a 20% second roll</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Marks refresh and never stack. Shield defense remains a separate balance pass from elemental weapon damage.</p>
+  </section>
+
+  <section>
+    <h2>Progression materials</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Quality</th><th>Biome</th><th>Previous boss trophy</th><th>Biome material</th><th>Station</th></tr></thead>
+        <tbody>
+          <tr><td>Q1</td><td>Black Forest</td><td>Eikthyr</td><td>Bronze</td><td>Forge</td></tr>
+          <tr><td>Q2</td><td>Swamp</td><td>The Elder</td><td>Iron</td><td>Forge</td></tr>
+          <tr><td>Q3</td><td>Mountains</td><td>Bonemass</td><td>Silver</td><td>Forge</td></tr>
+          <tr><td>Q4</td><td>Plains</td><td>Moder</td><td>Black metal</td><td>Forge</td></tr>
+          <tr><td>Q5</td><td>Mistlands</td><td>Yagluth</td><td>Refined eitr</td><td>Black Forge 1</td></tr>
+          <tr><td>Q6</td><td>Ashlands</td><td>The Queen</td><td>Flametal</td><td>Black Forge 3</td></tr>
+          <tr><td>Q7</td><td>Deep North</td><td>Fader</td><td>Bloodgold</td><td>Black Forge 4</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Sources:
+      <a href="https://valheim.fandom.com/wiki/Weapons">Valheim weapon matrix</a>,
+      <a href="https://www.valheim.tools/items/slayer">Ashlands item data</a>,
+      <a href="https://www.valheimgame.com/news/valheim-1-0-has-arrived-/">official Valheim 1.0 announcement</a>.
+      Deep North damage and quality growth were verified against serialized prefabs from Valheim 1.0 launch build 25185596.
+    </p>
+    <p>Hunter's Arsenal balance proposal · September 10, 2026</p>
+  </footer>
+</main>
+</body>
+</html>

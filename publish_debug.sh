@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DLL=JotunnModStub/bin/Debug/JotunnModStub.dll
-PLUGINS=/home/$USER/.local/share/Steam/steamapps/common/Valheim/BepInEx/plugins
+DLL=JotunnModStub/bin/Debug/net48/HuntersArsenal.dll
+PLUGINS="${R2MODMAN_PROFILE:-/home/$USER/.config/r2modmanPlus-local/Valheim/profiles/Mod Test}/BepInEx/plugins/HuntersArsenal"
 
 # Check that source files exist and are readable
 if [ ! -f "$DLL" ]; then
@@ -10,10 +10,7 @@ if [ ! -f "$DLL" ]; then
 fi
 
 # Check that target directory exists and is writable
-if [ ! -d "$PLUGINS" ]; then
-    echo "Error: $PLUGINS directory does not exist."
-    exit 1
-fi
+mkdir -p "$PLUGINS"
 
 if [ ! -w "$PLUGINS" ]; then
     echo "Error: $PLUGINS directory is not writable."
